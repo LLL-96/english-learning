@@ -45,9 +45,15 @@ function loadVoices() {
 
 // 设置事件监听
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
     // 年级按钮
-    document.querySelectorAll('.grade-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
+    const gradeButtons = document.querySelectorAll('.grade-btn');
+    console.log('Found grade buttons:', gradeButtons.length);
+    
+    gradeButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            console.log('Grade button clicked:', e.target.dataset.grade);
             document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentGrade = parseInt(btn.dataset.grade);
@@ -129,11 +135,17 @@ function loadGrade(grade) {
 
 // 更新单词显示
 function updateWordDisplay(words) {
+    console.log('Updating word display, words count:', words.length);
+    
     const wordDisplay = document.querySelector('.word-display');
     const progressText = document.querySelector('.progress-text');
     
+    console.log('wordDisplay element:', wordDisplay ? 'found' : 'not found');
+    console.log('progressText element:', progressText ? 'found' : 'not found');
+    
     if (words.length > 0 && currentWordIndex < words.length) {
         const word = words[currentWordIndex];
+        console.log('Current word:', word);
         
         if (wordDisplay) {
             wordDisplay.innerHTML = `
@@ -141,6 +153,7 @@ function updateWordDisplay(words) {
                 <p class="phonetic">${word.phonetic || ''}</p>
                 <p class="chinese-meaning">${word.cn || word.chinese || ''}</p>
             `;
+            console.log('Word display updated');
         }
         
         if (progressText) {
