@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小学英语单词学习 - 1-6年级</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>🎓 小学英语单词学习</h1>
+            <p class="subtitle">1-6年级全覆盖 | 真人发音 | 免费学习</p>
+        </header>
+
+        <nav class="grade-nav">
+            <button class="grade-btn active" data-grade="1">一年级</button>
+            <button class="grade-btn" data-grade="2">二年级</button>
+            <button class="grade-btn" data-grade="3">三年级</button>
+            <button class="grade-btn" data-grade="4">四年级</button>
+            <button class="grade-btn" data-grade="5">五年级</button>
+            <button class="grade-btn" data-grade="6">六年级</button>
+        </nav>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="words">📚 单词学习</button>
+            <button class="mode-btn" data-mode="texts">📖 课文朗读</button>
+            <button class="mode-btn" data-mode="test">📝 单词测试</button>
+        </div>
+
+        <main class="main-content">
+            <div class="content-section" id="words-section">
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                    <span class="progress-text">1 / 50</span>
+                </div>
+                
+                <div class="word-card">
+                    <div class="word-display">
+                        <h2 class="english-word">Hello</h2>
+                        <p class="phonetic">/həˈloʊ/</p>
+                        <p class="chinese-meaning">你好</p>
+                    </div>
+                    
+                    <div class="word-actions">
+                        <button class="btn-speak" onclick="speakWord()">🔊 朗读单词</button>
+                        <button class="btn-example" onclick="showExample()">💡 例句</button>
+                    </div>
+                    
+                    <div class="example-sentence" style="display: none;">
+                        <p class="sentence-en">Hello, how are you?</p>
+                        <p class="sentence-cn">你好，你好吗？</p>
+                        <button class="btn-speak-small" onclick="speakSentence()">🔊</button>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="nav-btn prev" onclick="prevWord()">← 上一个</button>
+                    <button class="nav-btn next" onclick="nextWord()">下一个 →</button>
+                </div>
+            </div>
+
+            <div class="content-section" id="texts-section" style="display: none;">
+                <div class="text-selector">
+                    <select id="text-select"></select>
+                </div>
+                
+                <div class="text-content">
+                    <h3 id="text-title"></h3>
+                    <div class="text-body" id="text-body"></div>
+                    <button class="btn-speak-full" onclick="speakFullText()">🔊 朗读全文</button>
+                </div>
+            </div>
+
+            <div class="content-section" id="test-section" style="display: none;">
+                <div class="test-stats">
+                    <span>得分: <strong id="score">0</strong></span>
+                    <span>题目: <strong id="question-num">1</strong>/10</span>
+                </div>
+                
+                <div class="test-card">
+                    <h3 id="test-question">请听发音，选择正确的中文意思</h3>
+                    <button class="btn-listen" onclick="playTestAudio()">🔊 播放发音</button>
+                    <div class="options" id="test-options"></div>
+                </div>
+                
+                <div class="test-result" id="test-result" style="display: none;">
+                    <p id="result-text"></p>
+                    <button class="nav-btn" onclick="nextQuestion()">下一题</button>
+                </div>
+            </div>
+        </main>
+
+        <div class="settings-panel">
+            <h4>⚙️ 设置</h4>
+            <div class="setting-item">
+                <label>朗读速度:</label>
+                <input type="range" id="rate" min="0.5" max="1.5" step="0.1" value="0.8">
+                <span id="rate-value">0.8</span>
+            </div>
+            <div class="setting-item">
+                <label>选择语音:</label>
+                <select id="voice-select"><option value="">默认语音</option></select>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>2025 小学英语单词学习 | 免费教育软件</p>
+        </footer>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
