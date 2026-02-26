@@ -10,9 +10,20 @@ let voices = [];
 
 // 初始化
 function init() {
+    console.log('Initializing app...');
+    console.log('wordsData available:', typeof wordsData !== 'undefined');
+    
     loadVoices();
     setupEventListeners();
     loadGrade(3);
+}
+
+// 等待 DOM 和数据加载完成
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    // DOM 已经加载完成，延迟一点确保数据也加载了
+    setTimeout(init, 100);
 }
 
 // 加载语音列表
@@ -80,18 +91,37 @@ function loadGrade(grade) {
     currentGrade = grade;
     currentWordIndex = 0;
     
+    console.log('Loading grade:', grade);
+    console.log('wordsData available:', typeof wordsData !== 'undefined');
+    
     // 获取数据
     let words = [];
-    if (window.wordsData && window.wordsData[`grade${grade}`]) {
-        const gradeData = window.wordsData[`grade${grade}`];
-        if (gradeData.units) {
+    
+    // 尝试不同的键名格式
+    let gradeData = null;
+    if (typeof wordsData !== 'undefined') {
+        // 尝试 grade3, grade4, grade5, grade6, grade3b, grade4b, grade5b, grade6b
+        const gradeKey = `grade${grade}`;
+        const gradeKeyB = `grade${grade}b`;
+        
+        if (wordsData[gradeKey] && wordsData[gradeKey].units) {
+            gradeData = wordsData[gradeKey];
+        } else if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
+            gradeData = wordsData[gradeKeyB];
+        }
+        
+        console.log('Grade data found:', gradeData ? 'yes' : 'no');
+        
+        if (gradeData && gradeData.units) {
             gradeData.units.forEach(unit => {
-                if (unit.words) {
+                if (unit.words && Array.isArray(unit.words)) {
                     words = words.concat(unit.words);
                 }
             });
         }
     }
+    
+    console.log('Total words:', words.length);
     
     // 更新显示
     updateWordDisplay(words);
@@ -199,11 +229,14 @@ function nextWord() {
 // 获取当前单词列表
 function getCurrentWords() {
     let words = [];
-    if (window.wordsData && window.wordsData[`grade${currentGrade}`]) {
-        const gradeData = window.wordsData[`grade${currentGrade}`];
-        if (gradeData.units) {
+    if (typeof wordsData !== 'undefined') {
+        const gradeKey = `grade${currentGrade}`;
+        const gradeKeyB = `grade${currentGrade}b`;
+        let gradeData = wordsData[gradeKey] || wordsData[gradeKeyB];
+        
+        if (gradeData && gradeData.units) {
             gradeData.units.forEach(unit => {
-                if (unit.words) {
+                if (unit.words && Array.isArray(unit.words)) {
                     words = words.concat(unit.words);
                 }
             });
@@ -212,5 +245,4 @@ function getCurrentWords() {
     return words;
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', init);
+

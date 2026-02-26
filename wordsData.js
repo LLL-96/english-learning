@@ -1106,7 +1106,9 @@ Object.keys(wordsData).forEach(gradeKey => {
 });
 
 // 同时导出 wordsData 和 textsData
-module.exports = {
-  wordsData,
-  textsData
-};
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    wordsData,
+    textsData
+  };
+}
