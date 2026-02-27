@@ -7,7 +7,7 @@ const wordsData = {
         unit: 1,
         title: "Unit 1 Hello!",
         words: [
-          {en: "ruler", phonetic: "/ˈruːlər/", cn: "尺子", example: "I have a ruler.", exampleCn: "我有一本尺子。"},
+          {en: "ruler", phonetic: "/ˈruːlər/", cn: "尺子", example: "I have a ruler.", exampleCn: "我有一把尺子。"},
           {en: "pencil", phonetic: "/ˈpensl/", cn: "铅笔", example: "This is my pencil.", exampleCn: "这是我的铅笔。"},
           {en: "eraser", phonetic: "/ɪˈreɪsər/", cn: "橡皮", example: "The eraser is white.", exampleCn: "这块橡皮是白色的。"},
           {en: "crayon", phonetic: "/ˈkreɪən/", cn: "蜡笔", example: "I like the crayon.", exampleCn: "我喜欢蜡笔。"},
