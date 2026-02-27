@@ -2,7 +2,7 @@
 
 // 当前状态
 let currentGrade = 3;
-let currentSemester = 'a'; // 'a' = 上册, 'b' = 下册
+let currentSemester = ''; // '' = 上册, 'b' = 下册
 let currentUnit = 'all'; // 'all' = 全部单元, 或具体单元编号
 let currentWordIndex = 0;
 let currentMode = 'words';
@@ -287,14 +287,22 @@ function nextWord() {
 // 获取当前单词列表（根据上下册和单元选择）
 function getCurrentWords() {
     let words = [];
+    console.log('getCurrentWords - grade:', currentGrade, 'semester:', currentSemester, 'unit:', currentUnit);
+    
     if (typeof wordsData !== 'undefined') {
         const gradeKey = `grade${currentGrade}${currentSemester}`;
+        console.log('getCurrentWords - gradeKey:', gradeKey);
+        console.log('getCurrentWords - wordsData keys:', Object.keys(wordsData));
+        console.log('getCurrentWords - gradeKey exists:', !!wordsData[gradeKey]);
         
         if (wordsData[gradeKey] && wordsData[gradeKey].units) {
+            console.log('getCurrentWords - units count:', wordsData[gradeKey].units.length);
+            
             if (currentUnit === 'all') {
                 // 加载全部单元
-                wordsData[gradeKey].units.forEach(unit => {
+                wordsData[gradeKey].units.forEach((unit, idx) => {
                     if (unit.words && Array.isArray(unit.words)) {
+                        console.log(`getCurrentWords - unit ${idx} words count:`, unit.words.length);
                         words = words.concat(unit.words);
                     }
                 });
@@ -308,11 +316,12 @@ function getCurrentWords() {
             }
         }
     }
+    console.log('getCurrentWords - total words:', words.length);
     return words;
 }
 
 // 当前课文选择的上下册
-let textCurrentSemester = 'a';
+let textCurrentSemester = '';
 
 // 加载课文内容
 function loadTexts() {
@@ -408,12 +417,16 @@ let testQuestionIndex = 0;
 let testQuestions = [];
 
 function initTest() {
+    console.log('initTest called');
     testScore = 0;
     testQuestionIndex = 0;
     
     // 生成测试题目
     const words = getCurrentWords();
+    console.log('initTest - words count:', words.length);
+    
     testQuestions = generateTestQuestions(words);
+    console.log('initTest - testQuestions count:', testQuestions.length);
     
     // 更新分数显示
     const scoreElement = document.getElementById('score');
