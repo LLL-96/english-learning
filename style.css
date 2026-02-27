@@ -64,6 +64,31 @@ body {
     transform: translateY(-2px);
 }
 
+.semester-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.semester-btn {
+    padding: 8px 20px;
+    border: 2px solid #28a745;
+    background: white;
+    color: #28a745;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s;
+}
+
+.semester-btn:hover, .semester-btn.active {
+    background: #28a745;
+    color: white;
+}
+
 .mode-selector {
     display: flex;
     justify-content: center;
@@ -92,6 +117,20 @@ body {
 .main-content {
     padding: 30px;
     min-height: 400px;
+}
+
+.unit-selector {
+    margin-bottom: 15px;
+}
+
+.unit-selector select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #667eea;
+    border-radius: 10px;
+    font-size: 1em;
+    background: white;
+    cursor: pointer;
 }
 
 .progress-bar {
@@ -246,6 +285,29 @@ body {
 
 .nav-btn.prev:hover {
     transform: translateX(-5px);
+}
+
+.text-semester-selector {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.text-semester-btn {
+    padding: 8px 20px;
+    border: 2px solid #17a2b8;
+    background: white;
+    color: #17a2b8;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s;
+}
+
+.text-semester-btn:hover, .text-semester-btn.active {
+    background: #17a2b8;
+    color: white;
 }
 
 .text-selector {

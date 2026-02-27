@@ -20,6 +20,11 @@
             <button class="grade-btn" data-grade="6">六年级</button>
         </nav>
 
+        <nav class="semester-nav">
+            <button class="semester-btn active" data-semester="a">上册</button>
+            <button class="semester-btn" data-semester="b">下册</button>
+        </nav>
+
         <div class="mode-selector">
             <button class="mode-btn active" data-mode="words">📚 单词学习</button>
             <button class="mode-btn" data-mode="texts">📖 课文朗读</button>
@@ -28,6 +33,12 @@
 
         <main class="main-content">
             <div class="content-section" id="words-section">
+                <div class="unit-selector">
+                    <select id="unit-select">
+                        <option value="all">全部单元</option>
+                    </select>
+                </div>
+                
                 <div class="progress-bar">
                     <div class="progress-fill"></div>
                     <span class="progress-text">1 / 50</span>
@@ -59,6 +70,10 @@
             </div>
 
             <div class="content-section" id="texts-section" style="display: none;">
+                <div class="text-semester-selector">
+                    <button class="text-semester-btn active" data-semester="a">上册</button>
+                    <button class="text-semester-btn" data-semester="b">下册</button>
+                </div>
                 <div class="text-selector">
                     <select id="text-select"></select>
                 </div>

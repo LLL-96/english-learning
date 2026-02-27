@@ -2,7 +2,8 @@
 
 // 当前状态
 let currentGrade = 3;
-let currentUnit = 1;
+let currentSemester = 'a'; // 'a' = 上册, 'b' = 下册
+let currentUnit = 'all'; // 'all' = 全部单元, 或具体单元编号
 let currentWordIndex = 0;
 let currentMode = 'words';
 let speechRate = 0.8;
@@ -61,6 +62,31 @@ function setupEventListeners() {
         });
     });
 
+    // 上下册按钮
+    const semesterButtons = document.querySelectorAll('.semester-btn');
+    console.log('Found semester buttons:', semesterButtons.length);
+    
+    semesterButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            console.log('Semester button clicked:', e.target.dataset.semester);
+            document.querySelectorAll('.semester-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentSemester = btn.dataset.semester;
+            loadGrade(currentGrade);
+        });
+    });
+
+    // 单元选择器
+    const unitSelect = document.getElementById('unit-select');
+    if (unitSelect) {
+        unitSelect.addEventListener('change', (e) => {
+            currentUnit = e.target.value;
+            currentWordIndex = 0;
+            const words = getCurrentWords();
+            updateWordDisplay(words);
+        });
+    }
+
     // 模式按钮
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -97,39 +123,39 @@ function loadGrade(grade) {
     currentGrade = grade;
     currentWordIndex = 0;
     
-    console.log('Loading grade:', grade);
+    console.log('Loading grade:', grade, 'semester:', currentSemester);
     console.log('wordsData available:', typeof wordsData !== 'undefined');
     
-    // 获取数据（包含上下册）
-    let words = [];
+    // 填充单元选择器
+    populateUnitSelect(grade);
     
-    if (typeof wordsData !== 'undefined') {
-        const gradeKey = `grade${grade}`;
-        const gradeKeyB = `grade${grade}b`;
-        
-        // 获取上册数据
-        if (wordsData[gradeKey] && wordsData[gradeKey].units) {
-            wordsData[gradeKey].units.forEach(unit => {
-                if (unit.words && Array.isArray(unit.words)) {
-                    words = words.concat(unit.words);
-                }
-            });
-        }
-        
-        // 获取下册数据
-        if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
-            wordsData[gradeKeyB].units.forEach(unit => {
-                if (unit.words && Array.isArray(unit.words)) {
-                    words = words.concat(unit.words);
-                }
-            });
-        }
-    }
+    // 获取当前单词列表
+    const words = getCurrentWords();
     
     console.log('Total words:', words.length);
     
     // 更新显示
     updateWordDisplay(words);
+}
+
+// 填充单元选择器
+function populateUnitSelect(grade) {
+    const unitSelect = document.getElementById('unit-select');
+    if (!unitSelect) return;
+    
+    // 清空现有选项
+    unitSelect.innerHTML = '<option value="all">全部单元</option>';
+    
+    const gradeKey = `grade${grade}${currentSemester}`;
+    
+    if (typeof wordsData !== 'undefined' && wordsData[gradeKey] && wordsData[gradeKey].units) {
+        wordsData[gradeKey].units.forEach((unit, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = unit.title;
+            unitSelect.appendChild(option);
+        });
+    }
 }
 
 // 更新单词显示
@@ -258,33 +284,35 @@ function nextWord() {
     }
 }
 
-// 获取当前单词列表（包含上下册）
+// 获取当前单词列表（根据上下册和单元选择）
 function getCurrentWords() {
     let words = [];
     if (typeof wordsData !== 'undefined') {
-        const gradeKey = `grade${currentGrade}`;
-        const gradeKeyB = `grade${currentGrade}b`;
+        const gradeKey = `grade${currentGrade}${currentSemester}`;
         
-        // 获取上册数据
         if (wordsData[gradeKey] && wordsData[gradeKey].units) {
-            wordsData[gradeKey].units.forEach(unit => {
-                if (unit.words && Array.isArray(unit.words)) {
-                    words = words.concat(unit.words);
+            if (currentUnit === 'all') {
+                // 加载全部单元
+                wordsData[gradeKey].units.forEach(unit => {
+                    if (unit.words && Array.isArray(unit.words)) {
+                        words = words.concat(unit.words);
+                    }
+                });
+            } else {
+                // 加载指定单元
+                const unitIndex = parseInt(currentUnit);
+                if (wordsData[gradeKey].units[unitIndex] && 
+                    wordsData[gradeKey].units[unitIndex].words) {
+                    words = wordsData[gradeKey].units[unitIndex].words;
                 }
-            });
-        }
-        
-        // 获取下册数据
-        if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
-            wordsData[gradeKeyB].units.forEach(unit => {
-                if (unit.words && Array.isArray(unit.words)) {
-                    words = words.concat(unit.words);
-                }
-            });
+            }
         }
     }
     return words;
 }
+
+// 当前课文选择的上下册
+let textCurrentSemester = 'a';
 
 // 加载课文内容
 function loadTexts() {
@@ -294,48 +322,49 @@ function loadTexts() {
     
     if (!textSelect || !textTitle || !textBody) return;
     
-    // 清空并重新填充选择框
-    textSelect.innerHTML = '';
-    
-    const gradeKey = `grade${currentGrade}`;
-    const gradeKeyB = `grade${currentGrade}b`;
-    
-    let allUnits = [];
-    
-    // 获取上册单元
-    if (wordsData[gradeKey] && wordsData[gradeKey].units) {
-        wordsData[gradeKey].units.forEach((unit, index) => {
-            allUnits.push({...unit, source: gradeKey, index: index});
+    // 绑定课文上下册按钮事件
+    const textSemesterButtons = document.querySelectorAll('.text-semester-btn');
+    textSemesterButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.text-semester-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            textCurrentSemester = btn.dataset.semester;
+            loadTextUnits();
         });
-    }
-    
-    // 获取下册单元
-    if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
-        wordsData[gradeKeyB].units.forEach((unit, index) => {
-            allUnits.push({...unit, source: gradeKeyB, index: index});
-        });
-    }
-    
-    // 填充选择框
-    allUnits.forEach((unit, index) => {
-        const option = document.createElement('option');
-        option.value = index;
-        option.textContent = unit.title;
-        textSelect.appendChild(option);
     });
     
-    // 存储所有单元供后续使用
-    window.allTextUnits = allUnits;
-    
-    // 显示第一个单元
-    if (allUnits.length > 0) {
-        showText(0);
-    }
+    // 加载单元列表
+    loadTextUnits();
     
     // 绑定选择事件
     textSelect.onchange = function() {
         showText(this.value);
     };
+}
+
+// 加载课文单元列表
+function loadTextUnits() {
+    const textSelect = document.getElementById('text-select');
+    if (!textSelect) return;
+    
+    // 清空并重新填充选择框
+    textSelect.innerHTML = '';
+    
+    const gradeKey = `grade${currentGrade}${textCurrentSemester}`;
+    
+    if (wordsData[gradeKey] && wordsData[gradeKey].units) {
+        wordsData[gradeKey].units.forEach((unit, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = unit.title;
+            textSelect.appendChild(option);
+        });
+        
+        // 显示第一个单元
+        if (wordsData[gradeKey].units.length > 0) {
+            showText(0);
+        }
+    }
 }
 
 // 显示指定课文
@@ -345,11 +374,10 @@ function showText(unitIndex) {
     
     if (!textTitle || !textBody) return;
     
-    // 使用存储的所有单元
-    const allUnits = window.allTextUnits || [];
+    const gradeKey = `grade${currentGrade}${textCurrentSemester}`;
     
-    if (allUnits[unitIndex]) {
-        const unit = allUnits[unitIndex];
+    if (wordsData[gradeKey] && wordsData[gradeKey].units[unitIndex]) {
+        const unit = wordsData[gradeKey].units[unitIndex];
         textTitle.textContent = unit.title;
         
         // 生成课文内容（使用例句）
