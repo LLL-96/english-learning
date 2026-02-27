@@ -184,6 +184,9 @@ function updateWordDisplay(words) {
         if (progressText) {
             progressText.textContent = `${currentWordIndex + 1} / ${words.length}`;
         }
+        
+        // 更新例句内容
+        updateExampleSentence(word);
     } else {
         console.log('No words to display');
         if (wordDisplay) {
@@ -195,6 +198,24 @@ function updateWordDisplay(words) {
         }
         if (progressText) {
             progressText.textContent = '0 / 0';
+        }
+    }
+}
+
+// 更新例句显示
+function updateExampleSentence(word) {
+    const sentenceEn = document.querySelector('.sentence-en');
+    const sentenceCn = document.querySelector('.sentence-cn');
+    
+    if (sentenceEn && sentenceCn && word) {
+        if (word.example) {
+            sentenceEn.textContent = word.example;
+            // 如果有中文翻译则显示，否则显示单词的中文释义
+            sentenceCn.textContent = word.exampleCn || word.cn || '';
+        } else {
+            // 如果没有例句，使用默认例句
+            sentenceEn.textContent = `This is a ${word.en || word.english}.`;
+            sentenceCn.textContent = `这是一个${word.cn || word.chinese || '单词'}。`;
         }
     }
 }
