@@ -100,26 +100,25 @@ function loadGrade(grade) {
     console.log('Loading grade:', grade);
     console.log('wordsData available:', typeof wordsData !== 'undefined');
     
-    // 获取数据
+    // 获取数据（包含上下册）
     let words = [];
     
-    // 尝试不同的键名格式
-    let gradeData = null;
     if (typeof wordsData !== 'undefined') {
-        // 尝试 grade3, grade4, grade5, grade6, grade3b, grade4b, grade5b, grade6b
         const gradeKey = `grade${grade}`;
         const gradeKeyB = `grade${grade}b`;
         
+        // 获取上册数据
         if (wordsData[gradeKey] && wordsData[gradeKey].units) {
-            gradeData = wordsData[gradeKey];
-        } else if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
-            gradeData = wordsData[gradeKeyB];
+            wordsData[gradeKey].units.forEach(unit => {
+                if (unit.words && Array.isArray(unit.words)) {
+                    words = words.concat(unit.words);
+                }
+            });
         }
         
-        console.log('Grade data found:', gradeData ? 'yes' : 'no');
-        
-        if (gradeData && gradeData.units) {
-            gradeData.units.forEach(unit => {
+        // 获取下册数据
+        if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
+            wordsData[gradeKeyB].units.forEach(unit => {
                 if (unit.words && Array.isArray(unit.words)) {
                     words = words.concat(unit.words);
                 }
@@ -245,7 +244,8 @@ function showExample() {
 function prevWord() {
     if (currentWordIndex > 0) {
         currentWordIndex--;
-        loadGrade(currentGrade);
+        const words = getCurrentWords();
+        updateWordDisplay(words);
     }
 }
 
@@ -254,20 +254,29 @@ function nextWord() {
     const words = getCurrentWords();
     if (currentWordIndex < words.length - 1) {
         currentWordIndex++;
-        loadGrade(currentGrade);
+        updateWordDisplay(words);
     }
 }
 
-// 获取当前单词列表
+// 获取当前单词列表（包含上下册）
 function getCurrentWords() {
     let words = [];
     if (typeof wordsData !== 'undefined') {
         const gradeKey = `grade${currentGrade}`;
         const gradeKeyB = `grade${currentGrade}b`;
-        let gradeData = wordsData[gradeKey] || wordsData[gradeKeyB];
         
-        if (gradeData && gradeData.units) {
-            gradeData.units.forEach(unit => {
+        // 获取上册数据
+        if (wordsData[gradeKey] && wordsData[gradeKey].units) {
+            wordsData[gradeKey].units.forEach(unit => {
+                if (unit.words && Array.isArray(unit.words)) {
+                    words = words.concat(unit.words);
+                }
+            });
+        }
+        
+        // 获取下册数据
+        if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
+            wordsData[gradeKeyB].units.forEach(unit => {
                 if (unit.words && Array.isArray(unit.words)) {
                     words = words.concat(unit.words);
                 }
@@ -290,20 +299,37 @@ function loadTexts() {
     
     const gradeKey = `grade${currentGrade}`;
     const gradeKeyB = `grade${currentGrade}b`;
-    const gradeData = wordsData[gradeKey] || wordsData[gradeKeyB];
     
-    if (gradeData && gradeData.units) {
-        gradeData.units.forEach((unit, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = unit.title;
-            textSelect.appendChild(option);
+    let allUnits = [];
+    
+    // 获取上册单元
+    if (wordsData[gradeKey] && wordsData[gradeKey].units) {
+        wordsData[gradeKey].units.forEach((unit, index) => {
+            allUnits.push({...unit, source: gradeKey, index: index});
         });
-        
-        // 显示第一个单元
-        if (gradeData.units.length > 0) {
-            showText(0);
-        }
+    }
+    
+    // 获取下册单元
+    if (wordsData[gradeKeyB] && wordsData[gradeKeyB].units) {
+        wordsData[gradeKeyB].units.forEach((unit, index) => {
+            allUnits.push({...unit, source: gradeKeyB, index: index});
+        });
+    }
+    
+    // 填充选择框
+    allUnits.forEach((unit, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = unit.title;
+        textSelect.appendChild(option);
+    });
+    
+    // 存储所有单元供后续使用
+    window.allTextUnits = allUnits;
+    
+    // 显示第一个单元
+    if (allUnits.length > 0) {
+        showText(0);
     }
     
     // 绑定选择事件
@@ -319,12 +345,11 @@ function showText(unitIndex) {
     
     if (!textTitle || !textBody) return;
     
-    const gradeKey = `grade${currentGrade}`;
-    const gradeKeyB = `grade${currentGrade}b`;
-    const gradeData = wordsData[gradeKey] || wordsData[gradeKeyB];
+    // 使用存储的所有单元
+    const allUnits = window.allTextUnits || [];
     
-    if (gradeData && gradeData.units[unitIndex]) {
-        const unit = gradeData.units[unitIndex];
+    if (allUnits[unitIndex]) {
+        const unit = allUnits[unitIndex];
         textTitle.textContent = unit.title;
         
         // 生成课文内容（使用例句）
