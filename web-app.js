@@ -416,12 +416,21 @@ function showText(unitIndex) {
         const unit = textsData[gradeKey].units[unitIndex];
         textTitle.textContent = unit.title;
         
-        // 使用课文内容，将换行转换为段落
-        if (unit.content) {
+        // 使用课文内容（新格式：数组包含{en, cn}对象）
+        if (unit.content && Array.isArray(unit.content)) {
+            let html = '';
+            unit.content.forEach((item, idx) => {
+                // 判断是否为对话（包含问号的句子）
+                const isQuestion = item.en.includes('?');
+                const className = isQuestion ? 'text-line dialogue question' : 'text-line dialogue';
+                html += `<p class="${className}">${item.en}<br><span class="text-cn">${item.cn}</span></p>`;
+            });
+            textBody.innerHTML = html;
+        } else if (unit.content && typeof unit.content === 'string') {
+            // 兼容旧格式：字符串使用换行分割
             const paragraphs = unit.content.split('\n').filter(line => line.trim());
             let html = '';
             paragraphs.forEach((paragraph, idx) => {
-                // 判断是否为对话（包含问号的句子）
                 const isQuestion = paragraph.includes('?');
                 const className = isQuestion ? 'text-line dialogue question' : 'text-line dialogue';
                 html += `<p class="${className}">${paragraph.trim()}</p>`;
@@ -451,9 +460,25 @@ function showText(unitIndex) {
 // 朗读全文
 function speakFullText() {
     const textBody = document.getElementById('text-body');
-    if (textBody && window.speechSynthesis) {
-        const text = textBody.textContent;
-        speak(text);
+    const gradeKey = `grade${currentGrade}${textCurrentSemester}`;
+    const textSelect = document.getElementById('text-select');
+    const unitIndex = textSelect ? parseInt(textSelect.value) : 0;
+    
+    if (window.speechSynthesis) {
+        // 优先使用textsData中的英文内容
+        if (typeof textsData !== 'undefined' && textsData[gradeKey] && textsData[gradeKey].units[unitIndex]) {
+            const unit = textsData[gradeKey].units[unitIndex];
+            if (unit.content && Array.isArray(unit.content)) {
+                const text = unit.content.map(item => item.en).join('. ');
+                speak(text);
+                return;
+            }
+        }
+        // 回退到使用DOM内容
+        if (textBody) {
+            const text = textBody.textContent;
+            speak(text);
+        }
     }
 }
 
