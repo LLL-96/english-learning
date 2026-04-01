@@ -1,0 +1,23 @@
+# 微信小程序配置文件（包含敏感信息）
+project.config.json
+sitemap.json
+
+# 小程序分包（网页不需要）
+package-words/
+
+# 音频文件（太大，网页用浏览器语音）
+audio/
+
+# 下载脚本（不需要）
+download_audio.py
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器配置
+.vscode/
+.idea/
+
+# 日志文件
+*.log

@@ -1,0 +1,100 @@
+<view class="container">
+  <!-- 年级选择 -->
+  <view class="grade-bar">
+    <scroll-view scroll-x class="grade-scroll">
+      <view class="grade-list">
+        <view class="grade-item {{currentGrade === 'grade3' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade3">三年级上</view>
+        <view class="grade-item {{currentGrade === 'grade3b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade3b">三年级下</view>
+        <view class="grade-item {{currentGrade === 'grade4' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade4">四年级上</view>
+        <view class="grade-item {{currentGrade === 'grade4b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade4b">四年级下</view>
+        <view class="grade-item {{currentGrade === 'grade5' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade5">五年级上</view>
+        <view class="grade-item {{currentGrade === 'grade5b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade5b">五年级下</view>
+        <view class="grade-item {{currentGrade === 'grade6' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade6">六年级上</view>
+        <view class="grade-item {{currentGrade === 'grade6b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade6b">六年级下</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 单元选择 -->
+  <view class="unit-bar">
+    <scroll-view scroll-x class="unit-scroll">
+      <view class="unit-list">
+        <block wx:for="{{units}}" wx:key="unit">
+          <view class="unit-item {{currentUnit === item.unit ? 'active' : ''}}" bindtap="switchUnit" data-unit="{{item.unit}}">
+            Unit {{item.unit}}
+          </view>
+        </block>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 进度条 -->
+  <view class="progress-section">
+    <view class="progress-info">
+      <text>进度: {{currentIndex + 1}} / {{wordsList.length}}</text>
+      <text wx:if="{{wordProgress}}" class="study-count">学习{{wordProgress.studyCount}}次</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{((currentIndex + 1) / wordsList.length) * 100}}%"></view>
+    </view>
+  </view>
+
+  <!-- 单词卡片 -->
+  <view class="word-card" wx:if="{{currentWord}}">
+    <!-- 收藏按钮 -->
+    <view class="favorite-btn" bindtap="toggleFavorite">
+      <text class="favorite-icon">{{isFavorite ? '★' : '☆'}}</text>
+    </view>
+
+    <!-- 掌握程度 -->
+    <view class="mastery-level" wx:if="{{wordProgress}}">
+      <text class="mastery-stars">{{wordProgress.masteryLevel >= 1 ? '★' : '☆'}}{{wordProgress.masteryLevel >= 2 ? '★' : '☆'}}{{wordProgress.masteryLevel >= 3 ? '★' : '☆'}}{{wordProgress.masteryLevel >= 4 ? '★' : '☆'}}{{wordProgress.masteryLevel >= 5 ? '★' : '☆'}}</text>
+      <text class="mastery-text">掌握度{{wordProgress.masteryLevel}}/5</text>
+    </view>
+
+    <view class="word-main">
+      <text class="word-en">{{currentWord.en}}</text>
+      <text class="word-phonetic">{{currentWord.phonetic}}</text>
+      <text class="word-cn">{{currentWord.cn}}</text>
+    </view>
+    
+    <!-- 例句 -->
+    <view class="example-section" wx:if="{{showExample}}">
+      <view class="example-line"></view>
+      <text class="example-en">{{currentWord.example}}</text>
+      <text class="example-cn">{{currentWord.exampleCn || ''}}</text>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-btns">
+      <button class="btn-speak" bindtap="speakWord">
+        <text class="btn-icon">🔊</text>
+        <text>朗读单词</text>
+      </button>
+      <button class="btn-speak btn-example" bindtap="toggleExample">
+        <text class="btn-icon">💡</text>
+        <text>{{showExample ? '隐藏例句' : '显示例句'}}</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 导航按钮 -->
+  <view class="nav-section">
+    <button class="nav-btn prev {{currentIndex === 0 ? 'disabled' : ''}}" bindtap="prevWord">← 上一个</button>
+    <button class="nav-btn next {{currentIndex === wordsList.length - 1 ? 'disabled' : ''}}" bindtap="nextWord">下一个 →</button>
+  </view>
+
+  <!-- 单词列表 -->
+  <view class="word-list-section">
+    <view class="section-title">本单元单词</view>
+    <view class="word-list">
+      <block wx:for="{{wordsList}}" wx:key="index">
+        <view class="word-item {{currentIndex === index ? 'active' : ''}}" bindtap="jumpToWord" data-index="{{index}}">
+          <text class="item-en">{{item.en}}</text>
+          <text class="item-cn">{{item.cn}}</text>
+          <text class="item-play" bindtap="speakItem" data-word="{{item.en}}">▶️</text>
+        </view>
+      </block>
+    </view>
+  </view>
+</view>

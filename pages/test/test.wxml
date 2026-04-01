@@ -1,0 +1,90 @@
+<view class="container">
+  <!-- 测试统计 -->
+  <view class="stats-bar">
+    <view class="stat-item">
+      <text class="stat-value">{{score}}</text>
+      <text class="stat-label">得分</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{currentQuestion}}/{{totalQuestions}}</text>
+      <text class="stat-label">题目</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{correctCount}}</text>
+      <text class="stat-label">正确</text>
+    </view>
+  </view>
+
+  <!-- 测试卡片 -->
+  <view class="test-card" wx:if="{{!testFinished}}">
+    <view class="question-section">
+      <text class="question-title">请听发音，选择正确的中文意思</text>
+      <button class="btn-listen" bindtap="playQuestion">
+        <text class="listen-icon">🔊</text>
+        <text>点击听发音</text>
+      </button>
+    </view>
+
+    <!-- 选项 -->
+    <view class="options-section">
+      <block wx:for="{{options}}" wx:key="index">
+        <button 
+          class="option-btn {{answered ? (item.isCorrect ? 'correct' : (selectedIndex === index ? 'wrong' : '')) : ''}}" 
+          bindtap="selectOption" 
+          data-index="{{index}}"
+          disabled="{{answered}}"
+        >
+          {{item.cn}}
+        </button>
+      </block>
+    </view>
+
+    <!-- 答案反馈 -->
+    <view class="feedback-section" wx:if="{{answered}}">
+      <view class="feedback {{isCorrect ? 'correct' : 'wrong'}}">
+        <text class="feedback-icon">{{isCorrect ? '✓' : '✗'}}</text>
+        <text class="feedback-text">{{isCorrect ? '回答正确！' : '回答错误！'}}</text>
+      </view>
+      <view class="correct-answer" wx:if="{{!isCorrect}}">
+        <text>正确答案是：{{correctWord.cn}}</text>
+        <text class="word-detail">{{correctWord.en}} {{correctWord.phonetic}}</text>
+      </view>
+      <button class="btn-next" bindtap="nextQuestion">下一题 →</button>
+    </view>
+  </view>
+
+  <!-- 测试结果 -->
+  <view class="result-card" wx:if="{{testFinished}}">
+    <view class="result-icon">🎉</view>
+    <text class="result-title">测试完成！</text>
+    <view class="result-score">
+      <text class="score-num">{{score}}</text>
+      <text class="score-total">/{{totalQuestions * 10}}</text>
+    </view>
+    <view class="result-detail">
+      <text>答对 {{correctCount}} 题，答错 {{wrongCount}} 题</text>
+      <text>正确率：{{correctRate}}%</text>
+    </view>
+    <view class="result-actions">
+      <button class="btn-restart" bindtap="restartTest">重新测试</button>
+      <button class="btn-back" bindtap="backToStudy">返回学习</button>
+    </view>
+  </view>
+
+  <!-- 设置 -->
+  <view class="settings-section">
+    <view class="section-title">测试设置</view>
+    <view class="setting-item">
+      <text>选择年级</text>
+      <picker mode="selector" range="{{gradeArray}}" value="{{gradeIndex}}" bindchange="onGradeChange">
+        <view class="picker-value">{{gradeArray[gradeIndex]}}</view>
+      </picker>
+    </view>
+    <view class="setting-item">
+      <text>题目数量</text>
+      <picker mode="selector" range="{{countArray}}" value="{{countIndex}}" bindchange="onCountChange">
+        <view class="picker-value">{{countArray[countIndex]}}题</view>
+      </picker>
+    </view>
+  </view>
+</view>

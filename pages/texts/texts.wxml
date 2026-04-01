@@ -1,0 +1,53 @@
+<view class="container">
+  <!-- 年级选择 -->
+  <view class="grade-bar">
+    <scroll-view scroll-x class="grade-scroll">
+      <view class="grade-list">
+        <view class="grade-item {{currentGrade === 'grade3' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade3">三年级上</view>
+        <view class="grade-item {{currentGrade === 'grade3b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade3b">三年级下</view>
+        <view class="grade-item {{currentGrade === 'grade4' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade4">四年级上</view>
+        <view class="grade-item {{currentGrade === 'grade4b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade4b">四年级下</view>
+        <view class="grade-item {{currentGrade === 'grade5' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade5">五年级上</view>
+        <view class="grade-item {{currentGrade === 'grade5b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade5b">五年级下</view>
+        <view class="grade-item {{currentGrade === 'grade6' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade6">六年级上</view>
+        <view class="grade-item {{currentGrade === 'grade6b' ? 'active' : ''}}" bindtap="switchGrade" data-grade="grade6b">六年级下</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 单元选择 -->
+  <view class="unit-section">
+    <picker mode="selector" range="{{unitArray}}" range-key="title" value="{{currentUnitIndex}}" bindchange="onUnitChange">
+      <view class="picker">
+        <text class="picker-text">{{currentUnitData.title || '选择单元'}}</text>
+        <text class="picker-arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 课文内容 -->
+  <view class="text-content" wx:if="{{currentUnitData}}">
+    <view class="text-title">{{currentUnitData.title}}</view>
+    
+    <view class="dialog-list">
+      <block wx:for="{{currentUnitData.dialogs}}" wx:key="index">
+        <view class="dialog-item">
+          <view class="dialog-en">{{item.en}}</view>
+          <view class="dialog-cn">{{item.cn}}</view>
+          <view class="dialog-actions">
+            <button class="btn-play" bindtap="speakDialog" data-text="{{item.en}}">▶️ 朗读</button>
+          </view>
+        </view>
+      </block>
+    </view>
+
+    <!-- 全文朗读 -->
+    <button class="btn-full-read" bindtap="speakFullText">🔊 朗读全文</button>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📖</text>
+    <text class="empty-text">该单元课文正在准备中</text>
+  </view>
+</view>

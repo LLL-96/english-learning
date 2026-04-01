@@ -1,0 +1,113 @@
+<view class="container">
+  <!-- 头部横幅 -->
+  <view class="header-banner">
+    <text class="welcome-text">🎓 小学英语单词学习</text>
+    <text class="sub-text">人教版PEP教材同步</text>
+  </view>
+
+  <!-- 年级选择 -->
+  <view class="section">
+    <view class="section-title">选择年级</view>
+    <view class="grade-selector">
+      <view class="grade-btn {{currentGrade === 'grade3' ? 'active' : ''}}" bindtap="selectGrade" data-grade="grade3">三年级</view>
+      <view class="grade-btn {{currentGrade === 'grade3b' ? 'active' : ''}}" bindtap="selectGrade" data-grade="grade3b">三年级下</view>
+      <view class="grade-btn {{currentGrade === 'grade4' ? 'active' : ''}}" bindtap="selectGrade" data-grade="grade4">四年级</view>
+      <view class="grade-btn {{currentGrade === 'grade5' ? 'active' : ''}}" bindtap="selectGrade" data-grade="grade5">五年级</view>
+      <view class="grade-btn {{currentGrade === 'grade6' ? 'active' : ''}}" bindtap="selectGrade" data-grade="grade6">六年级</view>
+    </view>
+  </view>
+
+  <!-- 功能入口 -->
+  <view class="section">
+    <view class="section-title">学习模块</view>
+    <view class="feature-grid">
+      <view class="feature-item" bindtap="goToWords">
+        <view class="feature-icon">📚</view>
+        <text class="feature-text">单词学习</text>
+        <text class="feature-desc">同步教材单词</text>
+      </view>
+      <view class="feature-item" bindtap="goToTexts">
+        <view class="feature-icon">📖</view>
+        <text class="feature-text">课文朗读</text>
+        <text class="feature-desc">真人语音朗读</text>
+      </view>
+      <view class="feature-item" bindtap="goToTest">
+        <view class="feature-icon">📝</view>
+        <text class="feature-text">单词测试</text>
+        <text class="feature-desc">巩固学习成果</text>
+      </view>
+      <view class="feature-item" bindtap="goToDictation">
+        <view class="feature-icon">🎧</view>
+        <text class="feature-text">听写练习</text>
+        <text class="feature-desc">听力拼写训练</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习统计 -->
+  <view class="section">
+    <view class="section-title">今日学习</view>
+    <view class="stats-card">
+      <view class="stat-item">
+        <text class="stat-num">{{todayWords}}</text>
+        <text class="stat-label">学习单词</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{todayTests}}</text>
+        <text class="stat-label">完成测试</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{correctRate}}%</text>
+        <text class="stat-label">正确率</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 累计统计 -->
+  <view class="section">
+    <view class="section-title">累计成就</view>
+    <view class="stats-card achievement-card">
+      <view class="stat-item">
+        <text class="stat-num">{{studyStats.streakDays}}</text>
+        <text class="stat-label">连续学习(天)</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{studyStats.totalWords}}</text>
+        <text class="stat-label">总学习次数</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{favoriteCount}}</text>
+        <text class="stat-label">收藏单词</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷开始 -->
+  <view class="section">
+    <button class="btn-primary start-btn" bindtap="quickStart">开始学习</button>
+  </view>
+
+  <!-- 使用说明 -->
+  <view class="tips-card">
+    <view class="tips-title">💡 使用提示</view>
+    <view class="tips-list">
+      <text class="tip-item">1. 点击"单词学习"查看单词和发音</text>
+      <text class="tip-item">2. 点击"课文朗读"学习对话</text>
+      <text class="tip-item">3. 完成"单词测试"巩固记忆</text>
+      <text class="tip-item">4. 使用本地音频文件，无需网络</text>
+    </view>
+  </view>
+
+  <!-- 免责声明 -->
+  <view class="disclaimer-card">
+    <view class="disclaimer-title">⚠️ 免责声明</view>
+    <text class="disclaimer-text">
+      本小程序中的教材内容仅供学习交流使用，版权归原作者所有。如有侵权，请联系我们删除。本小程序仅供学习参考，不构成任何形式的教育培训服务。
+    </text>
+  </view>
+
+  <!-- 隐私政策 -->
+  <view class="privacy-link" bindtap="goToPrivacy">
+    <text>📋 隐私政策</text>
+  </view>
+</view>

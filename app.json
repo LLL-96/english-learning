@@ -1,0 +1,50 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/words/words",
+    "pages/texts/texts",
+    "pages/test/test",
+    "pages/privacy/privacy"
+  ],
+  "subpackages": [
+    {
+      "root": "package-words",
+      "pages": [
+        "pages/dictation/dictation"
+      ]
+    }
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#667eea",
+    "navigationBarTitleText": "小学英语单词学习",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#667eea",
+    "backgroundColor": "#fff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/words/words",
+        "text": "单词"
+      },
+      {
+        "pagePath": "pages/texts/texts",
+        "text": "课文"
+      },
+      {
+        "pagePath": "pages/test/test",
+        "text": "测试"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
