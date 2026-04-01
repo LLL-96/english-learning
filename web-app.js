@@ -11,9 +11,6 @@ let voices = [];
 
 // 初始化
 function init() {
-    console.log('Initializing app...');
-    console.log('wordsData available:', typeof wordsData !== 'undefined');
-    
     loadVoices();
     setupEventListeners();
     loadGrade(3);
@@ -46,15 +43,11 @@ function loadVoices() {
 
 // 设置事件监听
 function setupEventListeners() {
-    console.log('Setting up event listeners...');
-    
     // 年级按钮
     const gradeButtons = document.querySelectorAll('.grade-btn');
-    console.log('Found grade buttons:', gradeButtons.length);
     
     gradeButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            console.log('Grade button clicked:', e.target.dataset.grade);
             document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentGrade = parseInt(btn.dataset.grade);
@@ -64,11 +57,9 @@ function setupEventListeners() {
 
     // 上下册按钮
     const semesterButtons = document.querySelectorAll('.semester-btn');
-    console.log('Found semester buttons:', semesterButtons.length);
     
     semesterButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            console.log('Semester button clicked:', e.target.dataset.semester);
             document.querySelectorAll('.semester-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentSemester = btn.dataset.semester;
@@ -123,16 +114,11 @@ function loadGrade(grade) {
     currentGrade = grade;
     currentWordIndex = 0;
     
-    console.log('Loading grade:', grade, 'semester:', currentSemester);
-    console.log('wordsData available:', typeof wordsData !== 'undefined');
-    
     // 填充单元选择器
     populateUnitSelect(grade);
     
     // 获取当前单词列表
     const words = getCurrentWords();
-    
-    console.log('Total words:', words.length);
     
     // 更新显示
     updateWordDisplay(words);
@@ -160,17 +146,12 @@ function populateUnitSelect(grade) {
 
 // 更新单词显示
 function updateWordDisplay(words) {
-    console.log('Updating word display, words count:', words.length);
-    
     const wordDisplay = document.querySelector('.word-display');
     const progressText = document.querySelector('.progress-text');
-    
-    console.log('wordDisplay element:', wordDisplay ? 'found' : 'not found');
-    console.log('progressText element:', progressText ? 'found' : 'not found');
+    const progressFill = document.querySelector('.progress-fill');
     
     if (words.length > 0 && currentWordIndex < words.length) {
         const word = words[currentWordIndex];
-        console.log('Current word:', word);
         
         if (wordDisplay) {
             wordDisplay.innerHTML = `
@@ -178,17 +159,21 @@ function updateWordDisplay(words) {
                 <p class="phonetic">${word.phonetic || ''}</p>
                 <p class="chinese-meaning">${word.cn || word.chinese || ''}</p>
             `;
-            console.log('Word display updated');
         }
         
         if (progressText) {
             progressText.textContent = `${currentWordIndex + 1} / ${words.length}`;
         }
         
+        // 更新进度条
+        if (progressFill) {
+            const progress = ((currentWordIndex + 1) / words.length) * 100;
+            progressFill.style.width = `${progress}%`;
+        }
+        
         // 更新例句内容
         updateExampleSentence(word);
     } else {
-        console.log('No words to display');
         if (wordDisplay) {
             wordDisplay.innerHTML = `
                 <h2 class="english-word">暂无数据</h2>
@@ -198,6 +183,9 @@ function updateWordDisplay(words) {
         }
         if (progressText) {
             progressText.textContent = '0 / 0';
+        }
+        if (progressFill) {
+            progressFill.style.width = '0%';
         }
     }
 }
@@ -260,23 +248,27 @@ function speakSentence() {
 // 语音合成
 function speak(text) {
     if (!window.speechSynthesis) {
-        alert('您的浏览器不支持语音合成');
+        showNotification('您的浏览器不支持语音合成', 'warning');
         return;
     }
     
-    window.speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = speechRate;
-    utterance.pitch = 1;
-    
-    // 选择英语语音
-    const englishVoice = voices.find(v => v.lang.includes('en-US') || v.lang.includes('en-GB'));
-    if (englishVoice) {
-        utterance.voice = englishVoice;
+    try {
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = speechRate;
+        utterance.pitch = 1;
+        
+        // 选择英语语音
+        const englishVoice = voices.find(v => v.lang.includes('en-US') || v.lang.includes('en-GB'));
+        if (englishVoice) {
+            utterance.voice = englishVoice;
+        }
+        
+        window.speechSynthesis.speak(utterance);
+    } catch (error) {
+        showNotification('语音播放失败，请重试', 'error');
     }
-    
-    window.speechSynthesis.speak(utterance);
 }
 
 // 显示例句
@@ -308,36 +300,33 @@ function nextWord() {
 // 获取当前单词列表（根据上下册和单元选择）
 function getCurrentWords() {
     let words = [];
-    console.log('getCurrentWords - grade:', currentGrade, 'semester:', currentSemester, 'unit:', currentUnit);
     
-    if (typeof wordsData !== 'undefined') {
-        const gradeKey = `grade${currentGrade}${currentSemester}`;
-        console.log('getCurrentWords - gradeKey:', gradeKey);
-        console.log('getCurrentWords - wordsData keys:', Object.keys(wordsData));
-        console.log('getCurrentWords - gradeKey exists:', !!wordsData[gradeKey]);
-        
-        if (wordsData[gradeKey] && wordsData[gradeKey].units) {
-            console.log('getCurrentWords - units count:', wordsData[gradeKey].units.length);
+    try {
+        if (typeof wordsData !== 'undefined') {
+            const gradeKey = `grade${currentGrade}${currentSemester}`;
             
-            if (currentUnit === 'all') {
-                // 加载全部单元
-                wordsData[gradeKey].units.forEach((unit, idx) => {
-                    if (unit.words && Array.isArray(unit.words)) {
-                        console.log(`getCurrentWords - unit ${idx} words count:`, unit.words.length);
-                        words = words.concat(unit.words);
+            if (wordsData[gradeKey] && wordsData[gradeKey].units) {
+                if (currentUnit === 'all') {
+                    // 加载全部单元
+                    wordsData[gradeKey].units.forEach((unit) => {
+                        if (unit.words && Array.isArray(unit.words)) {
+                            words = words.concat(unit.words);
+                        }
+                    });
+                } else {
+                    // 加载指定单元
+                    const unitIndex = parseInt(currentUnit);
+                    if (wordsData[gradeKey].units[unitIndex] && 
+                        wordsData[gradeKey].units[unitIndex].words) {
+                        words = wordsData[gradeKey].units[unitIndex].words;
                     }
-                });
-            } else {
-                // 加载指定单元
-                const unitIndex = parseInt(currentUnit);
-                if (wordsData[gradeKey].units[unitIndex] && 
-                    wordsData[gradeKey].units[unitIndex].words) {
-                    words = wordsData[gradeKey].units[unitIndex].words;
                 }
             }
         }
+    } catch (error) {
+        showNotification('加载单词数据失败', 'error');
     }
-    console.log('getCurrentWords - total words:', words.length);
+    
     return words;
 }
 
@@ -411,49 +400,58 @@ function showText(unitIndex) {
     
     const gradeKey = `grade${currentGrade}${textCurrentSemester}`;
     
-    // 优先使用textsData课文数据
-    if (typeof textsData !== 'undefined' && textsData[gradeKey] && textsData[gradeKey].units[unitIndex]) {
-        const unit = textsData[gradeKey].units[unitIndex];
-        textTitle.textContent = unit.title;
-        
-        // 使用课文内容（新格式：数组包含{en, cn}对象）
-        if (unit.content && Array.isArray(unit.content)) {
+    try {
+        // 优先使用textsData课文数据
+        if (typeof textsData !== 'undefined' && textsData[gradeKey] && textsData[gradeKey].units[unitIndex]) {
+            const unit = textsData[gradeKey].units[unitIndex];
+            textTitle.textContent = unit.title;
+            
+            // 使用课文内容（新格式：数组包含{en, cn}对象）
+            if (unit.content && Array.isArray(unit.content)) {
+                let html = '';
+                unit.content.forEach((item) => {
+                    // 判断是否为对话（包含问号的句子）
+                    const isQuestion = item.en.includes('?');
+                    const className = isQuestion ? 'text-line dialogue question' : 'text-line dialogue';
+                    html += `<p class="${className}">${item.en}<br><span class="text-cn">${item.cn}</span></p>`;
+                });
+                textBody.innerHTML = html;
+            } else if (unit.content && typeof unit.content === 'string') {
+                // 兼容旧格式：字符串使用换行分割
+                const paragraphs = unit.content.split('\n').filter(line => line.trim());
+                let html = '';
+                paragraphs.forEach((paragraph) => {
+                    const isQuestion = paragraph.includes('?');
+                    const className = isQuestion ? 'text-line dialogue question' : 'text-line dialogue';
+                    html += `<p class="${className}">${paragraph.trim()}</p>`;
+                });
+                textBody.innerHTML = html;
+            } else {
+                textBody.innerHTML = '<p class="empty-state">暂无课文内容</p>';
+            }
+        } else if (wordsData[gradeKey] && wordsData[gradeKey].units[unitIndex]) {
+            // 回退到使用wordsData
+            const unit = wordsData[gradeKey].units[unitIndex];
+            textTitle.textContent = unit.title;
+            
+            // 生成课文内容（使用例句）
             let html = '';
-            unit.content.forEach((item, idx) => {
-                // 判断是否为对话（包含问号的句子）
-                const isQuestion = item.en.includes('?');
-                const className = isQuestion ? 'text-line dialogue question' : 'text-line dialogue';
-                html += `<p class="${className}">${item.en}<br><span class="text-cn">${item.cn}</span></p>`;
-            });
-            textBody.innerHTML = html;
-        } else if (unit.content && typeof unit.content === 'string') {
-            // 兼容旧格式：字符串使用换行分割
-            const paragraphs = unit.content.split('\n').filter(line => line.trim());
-            let html = '';
-            paragraphs.forEach((paragraph, idx) => {
-                const isQuestion = paragraph.includes('?');
-                const className = isQuestion ? 'text-line dialogue question' : 'text-line dialogue';
-                html += `<p class="${className}">${paragraph.trim()}</p>`;
-            });
-            textBody.innerHTML = html;
+            if (unit.words) {
+                unit.words.forEach((word) => {
+                    if (word.example) {
+                        html += `<p class="text-line"><strong>${word.en}</strong>: ${word.example}</p>`;
+                    }
+                });
+            }
+            textBody.innerHTML = html || '<p class="empty-state">暂无课文内容</p>';
         } else {
-            textBody.innerHTML = '<p>暂无课文内容</p>';
+            textTitle.textContent = '暂无数据';
+            textBody.innerHTML = '<p class="empty-state">该年级暂无课文数据</p>';
         }
-    } else if (wordsData[gradeKey] && wordsData[gradeKey].units[unitIndex]) {
-        // 回退到使用wordsData
-        const unit = wordsData[gradeKey].units[unitIndex];
-        textTitle.textContent = unit.title;
-        
-        // 生成课文内容（使用例句）
-        let html = '';
-        if (unit.words) {
-            unit.words.forEach((word, idx) => {
-                if (word.example) {
-                    html += `<p class="text-line"><strong>${word.en}</strong>: ${word.example}</p>`;
-                }
-            });
-        }
-        textBody.innerHTML = html || '<p>暂无课文内容</p>';
+    } catch (error) {
+        textTitle.textContent = '加载失败';
+        textBody.innerHTML = '<p class="empty-state">课文加载失败，请重试</p>';
+        showNotification('课文加载失败', 'error');
     }
 }
 
@@ -464,7 +462,12 @@ function speakFullText() {
     const textSelect = document.getElementById('text-select');
     const unitIndex = textSelect ? parseInt(textSelect.value) : 0;
     
-    if (window.speechSynthesis) {
+    if (!window.speechSynthesis) {
+        showNotification('您的浏览器不支持语音合成', 'warning');
+        return;
+    }
+    
+    try {
         // 优先使用textsData中的英文内容
         if (typeof textsData !== 'undefined' && textsData[gradeKey] && textsData[gradeKey].units[unitIndex]) {
             const unit = textsData[gradeKey].units[unitIndex];
@@ -479,6 +482,8 @@ function speakFullText() {
             const text = textBody.textContent;
             speak(text);
         }
+    } catch (error) {
+        showNotification('朗读失败，请重试', 'error');
     }
 }
 
@@ -488,16 +493,18 @@ let testQuestionIndex = 0;
 let testQuestions = [];
 
 function initTest() {
-    console.log('initTest called');
     testScore = 0;
     testQuestionIndex = 0;
     
     // 生成测试题目
     const words = getCurrentWords();
-    console.log('initTest - words count:', words.length);
+    
+    if (words.length === 0) {
+        showNotification('暂无单词数据，无法进行测试', 'warning');
+        return;
+    }
     
     testQuestions = generateTestQuestions(words);
-    console.log('initTest - testQuestions count:', testQuestions.length);
     
     // 更新分数显示
     const scoreElement = document.getElementById('score');
@@ -549,7 +556,7 @@ function showTestQuestion() {
         
         const options = [...wrongOptions, currentQuestion].sort(() => 0.5 - Math.random());
         
-        testOptions.innerHTML = options.map((opt, idx) => `
+        testOptions.innerHTML = options.map((opt) => `
             <button class="option-btn" onclick="checkAnswer('${opt.cn}', '${currentQuestion.cn}')">
                 ${opt.cn}
             </button>
@@ -587,3 +594,70 @@ function nextQuestion() {
     testQuestionIndex++;
     showTestQuestion();
 }
+
+// 通知系统
+function showNotification(message, type = 'info') {
+    // 移除现有的通知
+    const existingNotification = document.querySelector('.app-notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // 创建新通知
+    const notification = document.createElement('div');
+    notification.className = `app-notification ${type}`;
+    notification.textContent = message;
+    
+    // 样式
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: white;
+        font-size: 14px;
+        z-index: 10000;
+        animation: slideDown 0.3s ease;
+        background: ${type === 'error' ? '#e74c3c' : type === 'warning' ? '#f39c12' : '#3498db'};
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 3秒后自动移除
+    setTimeout(() => {
+        notification.style.animation = 'slideUp 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// 添加动画样式
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideDown {
+        from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+        to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+    @keyframes slideUp {
+        from { transform: translateX(-50%) translateY(0); opacity: 1; }
+        to { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    }
+    .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 40px;
+        font-size: 16px;
+    }
+`;
+document.head.appendChild(style);
+
+// 全局错误处理
+window.addEventListener('error', (event) => {
+    showNotification('发生错误，请刷新页面重试', 'error');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    showNotification('操作失败，请重试', 'error');
+});
