@@ -9,11 +9,85 @@ let currentMode = 'words';
 let speechRate = 0.8;
 let voices = [];
 
+// 本地存储键名
+const STORAGE_KEY = 'english_learning_progress';
+
+// 加载保存的学习进度
+function loadProgress() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            const progress = JSON.parse(saved);
+            currentGrade = progress.grade || 3;
+            currentSemester = progress.semester || '';
+            currentUnit = progress.unit || 'all';
+            currentWordIndex = progress.wordIndex || 0;
+            return true;
+        }
+    } catch (e) {
+        // 忽略存储错误
+    }
+    return false;
+}
+
+// 保存学习进度
+function saveProgress() {
+    try {
+        const progress = {
+            grade: currentGrade,
+            semester: currentSemester,
+            unit: currentUnit,
+            wordIndex: currentWordIndex,
+            timestamp: Date.now()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch (e) {
+        // 忽略存储错误
+    }
+}
+
+// 清除学习进度
+function clearProgress() {
+    try {
+        localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+        // 忽略错误
+    }
+}
+
 // 初始化
 function init() {
     loadVoices();
     setupEventListeners();
-    loadGrade(3);
+    setupKeyboardShortcuts();
+    
+    // 尝试加载保存的进度
+    const hasProgress = loadProgress();
+    if (hasProgress) {
+        // 恢复UI状态
+        restoreUIState();
+    }
+    
+    loadGrade(currentGrade);
+}
+
+// 恢复UI状态
+function restoreUIState() {
+    // 恢复年级按钮状态
+    document.querySelectorAll('.grade-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.grade) === currentGrade) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // 恢复上下册按钮状态
+    document.querySelectorAll('.semester-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.semester === currentSemester) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 // 等待 DOM 和数据加载完成
@@ -109,16 +183,64 @@ function setupEventListeners() {
     }
 }
 
+// 设置键盘快捷键
+function setupKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // 只在单词学习模式下响应
+        if (currentMode !== 'words') return;
+        
+        // 防止在输入框中触发
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        switch(e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                prevWord();
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                nextWord();
+                break;
+            case ' ':
+                e.preventDefault();
+                speakWord();
+                break;
+            case 'e':
+            case 'E':
+                e.preventDefault();
+                showExample();
+                break;
+            case 's':
+            case 'S':
+                e.preventDefault();
+                speakSentence();
+                break;
+        }
+    });
+}
+
 // 加载年级数据
 function loadGrade(grade) {
     currentGrade = grade;
-    currentWordIndex = 0;
     
     // 填充单元选择器
     populateUnitSelect(grade);
     
+    // 恢复单元选择
+    const unitSelect = document.getElementById('unit-select');
+    if (unitSelect && currentUnit !== 'all') {
+        unitSelect.value = currentUnit;
+    }
+    
     // 获取当前单词列表
     const words = getCurrentWords();
+    
+    // 确保索引不超出范围
+    if (currentWordIndex >= words.length) {
+        currentWordIndex = 0;
+    }
     
     // 更新显示
     updateWordDisplay(words);
@@ -285,6 +407,7 @@ function prevWord() {
         currentWordIndex--;
         const words = getCurrentWords();
         updateWordDisplay(words);
+        saveProgress(); // 保存进度
     }
 }
 
@@ -294,6 +417,7 @@ function nextWord() {
     if (currentWordIndex < words.length - 1) {
         currentWordIndex++;
         updateWordDisplay(words);
+        saveProgress(); // 保存进度
     }
 }
 

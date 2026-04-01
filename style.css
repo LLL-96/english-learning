@@ -287,6 +287,21 @@ body {
     transform: translateX(-5px);
 }
 
+.keyboard-tips {
+    text-align: center;
+    margin-top: 20px;
+    padding: 12px;
+    background: #f0f4ff;
+    border-radius: 10px;
+    border: 1px dashed #667eea;
+}
+
+.keyboard-tips p {
+    color: #667eea;
+    font-size: 0.9em;
+    margin: 0;
+}
+
 .text-semester-selector {
     display: flex;
     justify-content: center;
