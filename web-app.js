@@ -60,6 +60,7 @@ function init() {
     loadVoices();
     setupEventListeners();
     setupKeyboardShortcuts();
+    setupTouchGestures();
     
     // 尝试加载保存的进度
     const hasProgress = loadProgress();
@@ -219,6 +220,42 @@ function setupKeyboardShortcuts() {
                 break;
         }
     });
+}
+
+// 设置触摸滑动手势（移动端支持）
+function setupTouchGestures() {
+    const wordCard = document.querySelector('.word-card');
+    if (!wordCard) return;
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const minSwipeDistance = 50; // 最小滑动距离
+    
+    wordCard.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    wordCard.addEventListener('touchend', (e) => {
+        // 只在单词学习模式下响应
+        if (currentMode !== 'words') return;
+        
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+    
+    function handleSwipe() {
+        const swipeDistance = touchEndX - touchStartX;
+        
+        if (Math.abs(swipeDistance) > minSwipeDistance) {
+            if (swipeDistance > 0) {
+                // 向右滑动 -> 上一个单词
+                prevWord();
+            } else {
+                // 向左滑动 -> 下一个单词
+                nextWord();
+            }
+        }
+    }
 }
 
 // 加载年级数据

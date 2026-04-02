@@ -302,6 +302,20 @@ body {
     margin: 0;
 }
 
+.keyboard-tips .mobile-tips {
+    display: none;
+}
+
+/* 移动端显示滑动提示，隐藏键盘提示 */
+@media (max-width: 768px) {
+    .keyboard-tips .desktop-tips {
+        display: none;
+    }
+    .keyboard-tips .mobile-tips {
+        display: block;
+    }
+}
+
 .text-semester-selector {
     display: flex;
     justify-content: center;
