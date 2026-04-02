@@ -55,6 +55,36 @@ function clearProgress() {
     }
 }
 
+// 重置学习进度（用户触发）
+function resetProgress() {
+    if (confirm('确定要重置学习进度吗？这将清除所有保存的学习记录。')) {
+        clearProgress();
+        // 重置到默认状态
+        currentGrade = 3;
+        currentSemester = '';
+        currentUnit = 'all';
+        currentWordIndex = 0;
+        
+        // 恢复UI状态
+        document.querySelectorAll('.grade-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.grade) === 3) {
+                btn.classList.add('active');
+            }
+        });
+        
+        document.querySelectorAll('.semester-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.semester === '') {
+                btn.classList.add('active');
+            }
+        });
+        
+        loadGrade(3);
+        showNotification('学习进度已重置', 'info');
+    }
+}
+
 // 初始化
 function init() {
     loadVoices();
@@ -228,18 +258,45 @@ function setupTouchGestures() {
     if (!wordCard) return;
     
     let touchStartX = 0;
+    let touchStartY = 0;
     let touchEndX = 0;
+    let isSwiping = false;
     const minSwipeDistance = 50; // 最小滑动距离
     
     wordCard.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+        isSwiping = true;
+        wordCard.style.transition = 'none';
+    }, { passive: true });
+    
+    wordCard.addEventListener('touchmove', (e) => {
+        if (!isSwiping || currentMode !== 'words') return;
+        
+        const currentX = e.changedTouches[0].screenX;
+        const currentY = e.changedTouches[0].screenY;
+        const deltaX = currentX - touchStartX;
+        const deltaY = currentY - touchStartY;
+        
+        // 只有当水平滑动大于垂直滑动时才响应
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // 添加视觉反馈：卡片跟随手指移动
+            const rotate = deltaX * 0.05;
+            wordCard.style.transform = `translateX(${deltaX * 0.3}px) rotate(${rotate}deg)`;
+        }
     }, { passive: true });
     
     wordCard.addEventListener('touchend', (e) => {
         // 只在单词学习模式下响应
-        if (currentMode !== 'words') return;
+        if (currentMode !== 'words' || !isSwiping) return;
         
+        isSwiping = false;
         touchEndX = e.changedTouches[0].screenX;
+        
+        // 恢复卡片位置
+        wordCard.style.transition = 'transform 0.3s ease';
+        wordCard.style.transform = '';
+        
         handleSwipe();
     }, { passive: true });
     
@@ -332,6 +389,9 @@ function updateWordDisplay(words) {
         
         // 更新例句内容
         updateExampleSentence(word);
+        
+        // 更新页面标题
+        updatePageTitle(word);
     } else {
         if (wordDisplay) {
             wordDisplay.innerHTML = `
@@ -364,6 +424,15 @@ function updateExampleSentence(word) {
             sentenceEn.textContent = `This is a ${word.en || word.english}.`;
             sentenceCn.textContent = `这是一个${word.cn || word.chinese || '单词'}。`;
         }
+    }
+}
+
+// 更新页面标题
+function updatePageTitle(word) {
+    if (word && word.en) {
+        document.title = `${word.en} - 小学英语单词学习`;
+    } else {
+        document.title = '小学英语单词学习 - 3-6年级';
     }
 }
 

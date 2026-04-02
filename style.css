@@ -536,6 +536,22 @@ body {
     border-radius: 5px;
 }
 
+.btn-reset {
+    padding: 8px 16px;
+    border: 1px solid #dc3545;
+    background: white;
+    color: #dc3545;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s;
+}
+
+.btn-reset:hover {
+    background: #dc3545;
+    color: white;
+}
+
 .footer {
     background: #333;
     color: white;
